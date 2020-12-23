@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@WebServlet(name = "CustomerServlet", urlPatterns = "/customers")
+@WebServlet(name = "CustomerServlet", urlPatterns = "/customer")
 public class CustomerServlet extends HttpServlet {
 
     @Override
@@ -37,9 +37,9 @@ public class CustomerServlet extends HttpServlet {
             ResultSet rst = pstm.executeQuery();
             List<Customer> customersList = new ArrayList<>();
             while (rst.next()) {
-                id = rst.getString(1);
-                String name = rst.getString(2);
-                String address = rst.getString(3);
+                id = rst.getString(3);
+                String name = rst.getString(1);
+                String address = rst.getString(2);
                 customersList.add(new Customer(id, name, address));
             }
 
@@ -65,25 +65,30 @@ public class CustomerServlet extends HttpServlet {
         try (Connection connection = cp.getConnection()) {
 
             Customer customer;
-            if (req.getContentType().equals("application/json")){
+            if (req.getContentType().equals("application/json")) {
                 Jsonb jsonb = JsonbBuilder.create();
                 customer = jsonb.fromJson(req.getReader(), Customer.class);
-            }else{
+            } else {
                 /* application/x-www-form-urlencoded */
                 String id = req.getParameter("id");
                 String name = req.getParameter("name");
                 String address = req.getParameter("address");
-                customer = new Customer(id,name,address);
+                customer = new Customer(id, name, address);
 
             }
 
             /* Validation Logic */
             if (customer.getId() == null || customer.getName() == null || customer.getAddress() == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                System.out.println(1);
                 return;
             }
             if (!customer.getId().matches("C\\d{3}") || customer.getName().trim().isEmpty() || customer.getAddress().trim().isEmpty()) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                System.out.println(customer.getId());
+                System.out.println(customer.getName());
+                System.out.println(customer.getAddress());
+                System.out.println(1);
                 return;
             }
             PreparedStatement pstm = connection.prepareStatement("INSERT INTO Customer VALUES (?,?,?)");
@@ -97,11 +102,13 @@ public class CustomerServlet extends HttpServlet {
             }
         } catch (SQLIntegrityConstraintViolationException ex) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            System.out.println(1);
         } catch (SQLException throwables) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throwables.printStackTrace();
         } catch (JsonbException exp) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            System.out.println(1);
         }
     }
 
@@ -110,6 +117,8 @@ public class CustomerServlet extends HttpServlet {
 
         String id = req.getParameter("id");
         if (id == null || !id.matches("C\\d{3}")) {
+            System.out.println(1);
+            System.out.println(id);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -118,13 +127,19 @@ public class CustomerServlet extends HttpServlet {
         try (Connection connection = cp.getConnection()) {
             Jsonb jsonb = JsonbBuilder.create();
             Customer customer = jsonb.fromJson(req.getReader(), Customer.class);
+            System.out.println(customer.getId());
+            System.out.println(customer.getName());
+            System.out.println(customer.getAddress());
 
             /* Validation Logic */
             if (customer.getId() != null || customer.getName() == null || customer.getAddress() == null) {
+                System.out.println(2);
+                System.out.println(customer.getName() + " " + customer.getAddress());
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
             if (customer.getName().trim().isEmpty() || customer.getAddress().trim().isEmpty()) {
+                System.out.println(3);
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
@@ -143,9 +158,11 @@ public class CustomerServlet extends HttpServlet {
             } else {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
+        } catch (SQLIntegrityConstraintViolationException ex) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
         } catch (SQLException throwables) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throwables.printStackTrace();
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } catch (JsonbException exp) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }

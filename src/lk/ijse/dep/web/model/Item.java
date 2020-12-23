@@ -2,10 +2,6 @@ package lk.ijse.dep.web.model;
 
 import java.math.BigDecimal;
 
-/**
- * @author : Ranjith Suranga <suranga@ijse.lk>
- * @since : 12/10/20
- **/
 public class Item {
     private String code;
     private String description;

@@ -7,8 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/* With Servlets ( /* [WildCard Mapping] == / [Default Servlet] )*/
-/* With Filters ( /* [WildCard Mapping] != / (http://localhost:8080/pos/ )*/
 @WebFilter(filterName = "CorsFilter", urlPatterns = "/*")
 public class CorsFilter extends HttpFilter {
 
