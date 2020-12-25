@@ -66,14 +66,12 @@ public class ItemServlet extends HttpServlet {
             if (req.getContentType().equals("application/json")) {
                 Jsonb jsonb = JsonbBuilder.create();
                 item = jsonb.fromJson(req.getReader(), Item.class);
-                System.out.println(item.getCode() + " " + item.getDescription() + " " + item.getQty() + " " + item.getUnitPrice());
             } else {
                 String code = req.getParameter("code");
                 String description = req.getParameter("description");
                 int qty = Integer.parseInt(req.getParameter("qty"));
                 BigDecimal unitPrice = BigDecimal.valueOf(Double.parseDouble(req.getParameter("unitPrice")));
                 item = new Item(code, description, qty, unitPrice);
-                System.out.println(code + " " + description + " " + qty + " " + unitPrice);
             }
             if (item.getCode() == null || item.getDescription() == null || item.getQty() < 0 || (item.getUnitPrice().equals(null))) {
                 System.out.println(1);
@@ -149,10 +147,18 @@ public class ItemServlet extends HttpServlet {
         }
         BasicDataSource cp = (BasicDataSource) getServletContext().getAttribute("cp");
         try (Connection connection = cp.getConnection()) {
-            Jsonb jsonb = JsonbBuilder.create();
-            Item item = jsonb.fromJson(req.getReader(), Item.class);
+            Item item;
+            if (req.getContentType().equals("application/json")) {
+                Jsonb jsonb = JsonbBuilder.create();
+                item = jsonb.fromJson(req.getReader(), Item.class);
+            } else {
+                String description = req.getParameter("description");
+                int qty = Integer.parseInt(req.getParameter("qty"));
+                BigDecimal unitPrice = BigDecimal.valueOf(Double.parseDouble(req.getParameter("unitPrice")));
+                item = new Item(code, description, qty, unitPrice);
+            }
 
-            if (item.getCode() != null || item.getDescription() == null || item.getQty() < 0 || (item.getUnitPrice().equals(null))) {
+            if (item.getCode() == null || item.getDescription() == null || item.getQty() < 0 || (item.getUnitPrice().equals(null))) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
